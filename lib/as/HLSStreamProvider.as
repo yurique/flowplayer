@@ -42,7 +42,8 @@ package {
         private var config : Object;
         private var clip : Object;
         private var pos : Number;
-        private var seekOffset : Number;
+        private var seekOffset : Number = -1;
+        private var duration : Number;
         private var offsetPos : Number;
         private var backBuffer : Number;
         private var suppressReady : Boolean;
@@ -138,6 +139,8 @@ package {
         }
 
         public function seek(seconds : Number) : void {
+            player.debug('seek requested (seconds, seekOffset, duration, position) - (%d, %d, %d, %d)', [seconds, seekOffset, duration, offsetPos]);
+            if (seekOffset !== -1) seconds = seconds - seekOffset;
             hls.stream.seek(seconds);
             player.fire(Flowplayer.SEEK, seconds);
         }
@@ -157,7 +160,8 @@ package {
             return {
                 time:pos,
                 buffer:pos + hls.stream.bufferLength,
-                seekOffset: seekOffset
+                seekOffset: seekOffset,
+                duration: duration
             };
         }
 
@@ -174,11 +178,18 @@ package {
 
         /* private */
         private function _manifestHandler(event : HLSEvent) : void {
-            clip.bytes = clip.duration = event.levels[hls.startLevel].duration;
+            var llevel : Object = event.levels[hls.nextLevel];
+            clip.bytes = clip.duration = llevel.duration;
+            var li : Number = 0;
+            while (isNaN(clip.duration) && li < event.levels.length) {
+              llevel = event.levels[li];
+              clip.bytes = clip.duration = llevel.duration;
+              li++;
+            }
+            clip.width = llevel.width;
+            clip.height = llevel.height;
             clip.seekable = true;
             clip.src = clip.url = config.url;
-            clip.width = event.levels[hls.startLevel].width;
-            clip.height = event.levels[hls.startLevel].height;
             var confQualities : Array = [];
             var confQualityLabels : Object = {};
             player.debug('config', config);
@@ -273,6 +284,7 @@ package {
             this.offsetPos = event.mediatime.position;
             this.backBuffer = event.mediatime.backbuffer;
             this.seekOffset = event.mediatime.live_sliding_main;
+            this.duration = event.mediatime.duration;
             _checkVideoDimension();
         };
 

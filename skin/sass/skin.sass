@@ -20,7 +20,6 @@
   max-height: 100%
   overflow: hidden
   border-radius: .24em
-  border-radius: .24em
   background-position: center
   background-repeat: no-repeat
   background-size: contain
@@ -36,6 +35,9 @@
 
   *
     box-sizing: border-box
+
+  &.is-ready:not(.is-poster)
+    background-color: #333
 
   .fp-engine
     // must be block with <!DOCTYPE html>
@@ -59,36 +61,9 @@
     top: 0
 
   .fp-waiting
-    display: none
-    margin: 19% auto
-    text-align: center
-    @extend %absolute
-    top: 0
-
-    *
-      box-shadow: 0 0 5px #333
-
-    em
-      width: 1em
-      height: 1em
-      border-radius: 1em
-      background-color: rgba(#fff, 0.8)
-      display: inline-block
-      animation: pulse .6s infinite
-      margin: .3em
-      opacity: 0
-
-      &:nth-child(1)
-        animation-delay: .3s
-
-      &:nth-child(2)
-        animation-delay: .45s
-
-      &:nth-child(3)
-        animation-delay: .6s
-
-    // no animation support
+    // no svg support
     p
+      opacity: 0
       color: #ccc
       font-weight: bold
 
@@ -113,7 +88,7 @@
       transition: opacity .1s
       opacity: 0
 
-  &.fp-ui-shown, &.is-paused, &.is-mouseover
+  &.fp-ui-shown, &.is-paused, &.is-mouseover, &.is-loading
     .fp-ui
       background-image: linear-gradient(to top, rgba(#000, .25), transparent 15%)
       > *
@@ -195,9 +170,30 @@
       padding: .1em .3em
       margin: .1em
 
+  // Speed indicator
+  .fp-speed-flash
+    position: absolute
+    left: 0
+    right: 0
+    bottom: 0
+    top: 0
+    margin: auto
+    font-size: 4em
+    color: #fff
+    font-weight: bold
+    text-shadow: 0 0 10px rgba(#000, 0.3)
+    opacity: 0 !important
+    transform: scale(.8)
+    transition: all .2s
+    width: 4em
+    height: 2em
+    display: none
+    &.fp-hilite
+      opacity: 1 !important
+      transform: scale(1)
 
   // the big play button on center
-  .fp-play, .fp-pause
+  .fp-play, .fp-pause, .fp-waiting
     .fp-playbtn
       display: none
     svg
@@ -215,7 +211,7 @@
       transform: scale(.8)
       transition: all .2s
       display: none
-      &.fp-play-rounded-fill, &.fp-pause-rounded-fill
+      &.fp-play-rounded-fill, &.fp-pause-rounded-fill, &.fp-loading-rounded-fill
         display: block
 
     &.fp-visible
@@ -460,8 +456,10 @@
     .fp-timeline
       height: .3em
       max-width: 12em
+      width: 100%
       display: block
       margin: 0 auto
+      flex: none
   &.fp-playful
     @extend .fp-fat
 
@@ -550,10 +548,10 @@
       text-align: left
 
   &.fp-outlined
-    .fp-play, .fp-pause
-      svg.fp-play-rounded-fill, svg.fp-pause-rounded-fill
+    .fp-play, .fp-pause, .fp-waiting
+      svg.fp-play-rounded-fill, svg.fp-pause-rounded-fill, svg.fp-loading-rounded-fill
         display: none
-      svg.fp-play-rounded-outline, svg.fp-pause-rounded-outline
+      svg.fp-play-rounded-outline, svg.fp-pause-rounded-outline, svg.fp-loading-rounded-outline
         display: block
 
     .fp-airplay:before
@@ -631,3 +629,11 @@
   &.-blur video.fp-engine
     -webkit-filter: blur(5px)
     filter: blur(5px)
+
+
+
+.fp-filters
+  width: 0 !important
+  height: 0 !important
+  overflow: hidden !important
+  position: absolute
